@@ -166,14 +166,16 @@ def optimize_model(tagger, images, labels, lr=0.01, epochs=5, print_every=1):
                 # Compute loss for the current category's similarity scores and labels
                 loss = criterion(similarity, t_labels[category].to(device))
                 total_loss += loss  # Accumulate loss for all categories
+            
+            
+            # Backpropagate loss and update model parameters after each batch
+            total_loss.backward()
+            optimizer.step()
 
         # Print the loss at specified intervals
         if epoch % print_every == 0:
             print(f"Epoch: {epoch}, Loss: {total_loss.item()}")
 
-        # Backpropagate loss and update model parameters
-        total_loss.backward()
-        optimizer.step()
 
 # Generate tags from images using tagger
 def create_labels(tagger, images, threshold=0.6):
