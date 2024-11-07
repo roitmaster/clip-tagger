@@ -129,7 +129,7 @@ class Tagger():
         return resutls
 
 # Optimization Function to Tagger class
-def optimize_model(tagger, images, labels, lr=0.01, epochs=5, print_ever=1):
+def optimize_model(tagger, images, labels, lr=0.01, epochs=5, print_every=1):
     """
     Optimize the tagger model by fine-tuning text embeddings for image tagging.
     :param tagger: Tagger object containing CLIP model and text features
@@ -168,7 +168,7 @@ def optimize_model(tagger, images, labels, lr=0.01, epochs=5, print_ever=1):
                 total_loss += loss  # Accumulate loss for all categories
 
             # Print the loss at specified intervals
-            if epoch % print_ever == 0:
+            if epoch % print_every == 0:
                 print(f"Epoch: {epoch}, Loss: {total_loss.item()}")
 
             # Backpropagate loss and update model parameters
