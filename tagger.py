@@ -128,53 +128,63 @@ class Tagger():
             resutls.extend(batch_results)  # Append batch results to final results
         return resutls
 
-# Optimization Function to Tagger class
 def optimize_model(tagger, images, labels, lr=0.01, epochs=5, print_every=1):
     """
-    Optimize the tagger model by fine-tuning text embeddings for image tagging.
+    Fine-tune the tagger model by optimizing text feature embeddings using labeled image data.
+    
     :param tagger: Tagger object containing CLIP model and text features
     :param images: List of images to train on
     :param labels: Corresponding labels for each image
     :param lr: Learning rate for the optimizer
     :param epochs: Number of training epochs
-    :param print_ever: Frequency (in epochs) to print the loss
+    :param print_every: Interval (in epochs) to print training loss
     """
-    # Set device and model parameters from the tagger
+    
+    # Set device and retrieve model parameters from the tagger
     device = tagger.device
-    model = tagger.text_features  # Retrieve text features as model parameters
-
-    # Initialize optimizer and loss criterion
-    optimizer = torch.optim.AdamW(model.values(), lr=lr)  # Use AdamW optimizer
-    criterion = torch.nn.CrossEntropyLoss(ignore_index=-1)  # Cross-entropy loss, ignoring index -1
-
-    # Create DataLoader for batching images and labels
+    model = tagger.text_features  # Text feature embeddings for different tag categories
+    
+    # Initialize the optimizer with AdamW and set the learning rate
+    optimizer = torch.optim.AdamW(model.values(), lr=lr)
+    
+    # Set up cross-entropy loss, ignoring any labels set to -1 (e.g., for unlabeled data)
+    criterion = torch.nn.CrossEntropyLoss(ignore_index=-1)
+    
+    # Create a DataLoader to manage batching of images and labels
     dataloader = tagger.create_dataloader(images, labels)
+    
+    # Loop through the specified number of training epochs
     for epoch in range(epochs):
-        epoch_loss = 0.0  # Track epoch loss for printing
+        epoch_loss = 0.0  # Track cumulative loss for the epoch
+        
+        # Process each batch of images and labels from the dataloader
         for t_images, t_labels in dataloader:
-            optimizer.zero_grad()  # Reset gradients for the optimizer
-            total_loss = 0  # Initialize total loss for batch
-
-            # Encode images into feature embeddings using CLIP model
+            optimizer.zero_grad()  # Clear gradients for the optimizer
+            total_loss = torch.tensor(0.0).to(device)  # Initialize total loss for the batch
+            
+            # Encode images into feature embeddings using the CLIP model
             image_features = tagger.clip_model.encode_image(t_images.to(device)).float()
-
-            # Calculate similarity and loss for each category
+            
+            # Calculate similarity and loss for each category's text embeddings
             for category, embedding in model.items():
                 embedding = embedding.to(device)  # Move embeddings to device
                 # Calculate similarity between image features and text embeddings
-                similarity = (image_features @ embedding.T).softmax(dim=-1)
-                # Compute loss for the current category's similarity scores and labels
+                similarity = image_features @ embedding.T
+                # Compute loss for each category's similarity scores and labels
                 loss = criterion(similarity, t_labels[category].to(device))
-                total_loss += loss  # Accumulate loss for all categories
-            
-            
-            # Backpropagate loss and update model parameters after each batch
+                total_loss += loss  # Accumulate loss across categories
+
+            # Backpropagate the total loss and update model parameters
             total_loss.backward()
             optimizer.step()
-
-        # Print the loss at specified intervals
+            
+            # Accumulate the batch loss into the epoch's total loss
+            epoch_loss += total_loss.item()
+        
+        # Print epoch loss at the specified interval
         if epoch % print_every == 0:
-            print(f"Epoch: {epoch}, Loss: {total_loss.item()}")
+            print(f"Epoch: {epoch}, Loss: {epoch_loss}")
+
 
 
 # Generate tags from images using tagger
