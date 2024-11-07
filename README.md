@@ -2,6 +2,8 @@
 
 This repository contains code for a CLIP-based image tagging model that can generate tags for images using a dictionary of predefined tags. This project leverages OpenAI's [CLIP](https://github.com/openai/CLIP) model to create and assign relevant tags to images based on their similarity to text embeddings.
 
+you can look in the notebook for example of use
+
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
