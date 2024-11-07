@@ -64,7 +64,7 @@ def optimize_model(tagger, images, labels, lr=0.01, epochs=5, print_ever=1):
 ```
 
 ### Creating Labels
-The create_labels function uses the Tagger to generate tags above a set score threshold, filtering out low-confidence tags to reduce noise.
+The create_labels function uses the Tagger to generate tags above a set score threshold, filtering out low-confidence tags to reduce noise. **this is needed to be the input of the optimazation**
 
 ```
 def create_labels(tagger, images, threshold=0.6):
@@ -83,8 +83,17 @@ tag_dict = {
 tagger = Tagger(tag_dict)
 images = [image1, image2]  # Replace with your images in numpy array format
 
-labels = tagger(images, threshold=0.6)
+tags = tagger(images, threshold=0.6)
 print(labels)
+
+```
+
+### To Optimize
+
+```
+subset_images = np_images[:123]
+subset_labels = create_labels(tagger, subset_images, threshold=0.7)
+optimize_model(tagger, subset_images, subset_labels, lr=1e-3, epochs=50, print_every=1)
 
 ```
 
