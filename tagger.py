@@ -187,9 +187,6 @@ def create_labels(tagger, images, threshold=0.6):
     :return: List of dictionaries with labels above the threshold, with noise reduced by marking low scores as -1
     """
 
-    # Initialize the tagger with the provided tag dictionary (assuming 'tag_dict' is globally available)
-    tagger = Tagger(tag_dict)
-
     # Generate preliminary labels with scores (with a temporary threshold set to 0)
     tmp_labels = tagger(images, threshold=0)  # Get all scores for analysis
 
