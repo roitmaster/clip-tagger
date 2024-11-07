@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import clip  # OpenAI's CLIP model for image and text embedding
 from PIL import Image
+import cv2
+from torch.utils.data import Dataset, DataLoader
 
 
 # Custom dataset class to handle image data
